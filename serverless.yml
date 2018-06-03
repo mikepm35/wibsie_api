@@ -1,0 +1,216 @@
+service: wibsie
+
+frameworkVersion: ">=1.1.0 <2.0.0"
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+
+  stage: dev
+  region: us-east-1
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+        - lambda:InvokeAsync
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE_USERS}"
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE_EXPERIENCES}"
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE_LOCATIONS}"
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE_WEATHERREPORTS}"
+
+  environment:
+    DYNAMODB_TABLE_USERS: ${self:service}-users-${opt:stage, self:provider.stage}
+    DYNAMODB_TABLE_EXPERIENCES: ${self:service}-experiences-${opt:stage, self:provider.stage}
+    DYNAMODB_TABLE_LOCATIONS: ${self:service}-locations-${opt:stage, self:provider.stage}
+    DYNAMODB_TABLE_WEATHERREPORTS: ${self:service}-weatherreports-${opt:stage, self:provider.stage}
+    FUNCTION_PREFIX: ${self:service}-${opt:stage, self:provider.stage}-
+
+functions:
+  ### USERS ###
+  users_list:
+    handler: users/list.list
+    events:
+      - http:
+          path: users
+          method: get
+          cors: true
+
+  user_create:
+    handler: users/create.create
+    events:
+      - http:
+          path: users
+          method: post
+          cors: true
+
+  user_get:
+    handler: users/get.get
+    events:
+      - http:
+          path: users/{id}
+          method: get
+          cors: true
+
+  user_update:
+    handler: users/update.update
+    events:
+      - http:
+          path: users/{id}
+          method: put
+          cors: true
+
+  user_delete:
+    handler: users/delete.delete
+    events:
+      - http:
+          path: users/{id}
+          method: delete
+          cors: true
+
+  ### LOCATIONS ###
+  locations_list:
+    handler: locations/list.list
+    events:
+      - http:
+          path: locations
+          method: get
+          cors: true
+
+  location_create:
+    handler: locations/create.create
+    events:
+      - http:
+          path: locations
+          method: post
+          cors: true
+
+  location_get:
+    handler: locations/get.get
+    events:
+      - http:
+          path: locations/{zip}
+          method: get
+          cors: true
+
+  location_update:
+    handler: locations/update.update
+    events:
+      - http:
+          path: locations/{zip}
+          method: put
+          cors: true
+
+  location_delete:
+    handler: locations/delete.delete
+    events:
+      - http:
+          path: locations/{zip}
+          method: delete
+          cors: true
+
+  location_zipfromlatlong:
+    handler: locations/zipFromLatLong.zipFromLatLong
+    events:
+      - http:
+          path: locations/zipFromLatLong
+          method: post
+          cors: true
+
+  ### LOCATIONS - WEATHER REPORTS ###
+  location_weatherreport_get:
+    handler: locations/weatherreports/get.get
+    events:
+      - http:
+          path: locations/{zip}/weatherreports/{created}
+          method: get
+          cors: true
+
+resources:
+  Resources:
+    # UsersDynamoDbTable:
+    #   Type: 'AWS::DynamoDB::Table'
+    #   DeletionPolicy: Retain
+    #   Properties:
+    #     AttributeDefinitions:
+    #       -
+    #         AttributeName: id
+    #         AttributeType: S
+    #     KeySchema:
+    #       -
+    #         AttributeName: id
+    #         KeyType: HASH
+    #     ProvisionedThroughput:
+    #       ReadCapacityUnits: 1
+    #       WriteCapacityUnits: 1
+    #     TableName: ${self:provider.environment.DYNAMODB_TABLE_USERS}
+    # ExperiencesDynamoDbTable:
+    #   Type: 'AWS::DynamoDB::Table'
+    #   DeletionPolicy: Retain
+    #   Properties:
+    #     AttributeDefinitions:
+    #       -
+    #         AttributeName: uid
+    #         AttributeType: S
+    #       -
+    #         AttributeName: created
+    #         AttributeType: N
+    #     KeySchema:
+    #       -
+    #         AttributeName: uid
+    #         KeyType: HASH
+    #       -
+    #         AttributeName: created
+    #         KeyType: RANGE
+    #     ProvisionedThroughput:
+    #       ReadCapacityUnits: 1
+    #       WriteCapacityUnits: 1
+    #     TableName: ${self:provider.environment.DYNAMODB_TABLE_EXPERIENCES}
+    # LocationsDynamoDbTable:
+    #   Type: 'AWS::DynamoDB::Table'
+    #   DeletionPolicy: Retain
+    #   Properties:
+    #     AttributeDefinitions:
+    #       -
+    #         AttributeName: zip
+    #         AttributeType: S
+    #     KeySchema:
+    #       -
+    #         AttributeName: zip
+    #         KeyType: HASH
+    #     ProvisionedThroughput:
+    #       ReadCapacityUnits: 1
+    #       WriteCapacityUnits: 1
+    #     TableName: ${self:provider.environment.DYNAMODB_TABLE_LOCATIONS}
+    # WeatherreportsDynamoDbTable:
+    #   Type: 'AWS::DynamoDB::Table'
+    #   DeletionPolicy: Retain
+    #   Properties:
+    #     AttributeDefinitions:
+    #       -
+    #         AttributeName: zip
+    #         AttributeType: S
+    #       -
+    #         AttributeName: created
+    #         AttributeType: N
+    #     KeySchema:
+    #       -
+    #         AttributeName: zip
+    #         KeyType: HASH
+    #       -
+    #         AttributeName: created
+    #         KeyType: RANGE
+    #     ProvisionedThroughput:
+    #       ReadCapacityUnits: 1
+    #       WriteCapacityUnits: 1
+    #     TableName: ${self:provider.environment.DYNAMODB_TABLE_WEATHERREPORTS}

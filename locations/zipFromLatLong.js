@@ -7,7 +7,6 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 // Run a scan, return closest zip to fetch request
 module.exports.zipFromLatLong = (event, context, callback) => {
   console.log('Received event: ', event)
-  console.log('Event body type: ', typeof event.body)
 
   // Handle lambda-lambda calls
   var data = event.body

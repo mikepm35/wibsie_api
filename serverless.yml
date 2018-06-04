@@ -127,14 +127,33 @@ functions:
           method: post
           cors: true
 
-  ### LOCATIONS - WEATHER REPORTS ###
-  location_weatherreport_get:
-    handler: locations/weatherreports/get.get
+  ### WEATHER REPORTS ###
+  location_weatherreport_query:
+    handler: weatherreports/query.query
     events:
       - http:
-          path: locations/{zip}/weatherreports/{created}
+          path: weatherreports
           method: get
           cors: true
+
+  location_weatherreport_fetch:
+    handler: weatherreports/fetch.fetch
+    events:
+      - http:
+          path: weatherreports/{latlong}
+          method: get
+          cors: true
+
+  location_weatherreport_create:
+    handler: weatherreports/create.create
+    events:
+      - http:
+          path: weatherreports
+          method: post
+          cors: true
+
+  ### EXPERIENCES ###
+  #TODO
 
 resources:
   Resources:
@@ -154,28 +173,28 @@ resources:
     #       ReadCapacityUnits: 1
     #       WriteCapacityUnits: 1
     #     TableName: ${self:provider.environment.DYNAMODB_TABLE_USERS}
-    # ExperiencesDynamoDbTable:
-    #   Type: 'AWS::DynamoDB::Table'
-    #   DeletionPolicy: Retain
-    #   Properties:
-    #     AttributeDefinitions:
-    #       -
-    #         AttributeName: uid
-    #         AttributeType: S
-    #       -
-    #         AttributeName: created
-    #         AttributeType: N
-    #     KeySchema:
-    #       -
-    #         AttributeName: uid
-    #         KeyType: HASH
-    #       -
-    #         AttributeName: created
-    #         KeyType: RANGE
-    #     ProvisionedThroughput:
-    #       ReadCapacityUnits: 1
-    #       WriteCapacityUnits: 1
-    #     TableName: ${self:provider.environment.DYNAMODB_TABLE_EXPERIENCES}
+    ExperiencesDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: uid
+            AttributeType: S
+          -
+            AttributeName: weatherExpiration
+            AttributeType: N
+        KeySchema:
+          -
+            AttributeName: uid
+            KeyType: HASH
+          -
+            AttributeName: weatherExpiration
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.DYNAMODB_TABLE_EXPERIENCES}
     # LocationsDynamoDbTable:
     #   Type: 'AWS::DynamoDB::Table'
     #   DeletionPolicy: Retain
@@ -201,14 +220,14 @@ resources:
     #         AttributeName: zip
     #         AttributeType: S
     #       -
-    #         AttributeName: created
+    #         AttributeName: expires
     #         AttributeType: N
     #     KeySchema:
     #       -
     #         AttributeName: zip
     #         KeyType: HASH
     #       -
-    #         AttributeName: created
+    #         AttributeName: expires
     #         KeyType: RANGE
     #     ProvisionedThroughput:
     #       ReadCapacityUnits: 1

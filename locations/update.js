@@ -9,20 +9,17 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 module.exports.update = (event, context, callback) => {
   const timestamp = new Date().getTime();
-  const data = JSON.parse(event.body);
 
-  // Data validation
-  if (typeof data.loc_type != 'string') {
-    console.error('Location update validation failed')
-    callback(null, {
-      statusCode: 400,
-      headers: {'Content-Type': 'text/plain'},
-      body: 'Failed updating location due to validation',
-    });
-    return;
+  // Handle lambda-lambda calls
+  var data = event.body
+  if (typeof data == 'string') {
+    data = JSON.parse(data)
   }
 
+  // TODO: Data validation
+
   // Set table parameters
+  const density_psqkm = locationHelper.getPopDensity(data.population, data.aland_sqm);
   const params = {
     TableName: process.env.DYNAMODB_TABLE_LOCATIONS,
     Key: {
@@ -34,11 +31,11 @@ module.exports.update = (event, context, callback) => {
       ':population': data.population,
       ':aland_sqm': data.aland_sqm,
       ':awater_sqm': data.awater_sqm,
-      ':density_psqkm': data.density_psqkm,
-      ':loc_type': data.loc_type,
+      ':density_psqkm': density_psqkm,
+      ':loc_type': locationHelper.getLocationType(density_psqkm),
       ':updated': timestamp,
     },
-    UpdateExpression: 'SET longitude = :longitude, latitude = :latitude, elevation = :elevation, population = :population, aland_sqm = :aland_sqm, awater_sqm = :awater_sqm, density_psqkm = :density_psqkm, loc_type = :loc_type, updated = :updated',
+    UpdateExpression: 'SET longitude = :longitude, latitude = :latitude, population = :population, aland_sqm = :aland_sqm, awater_sqm = :awater_sqm, density_psqkm = :density_psqkm, loc_type = :loc_type, updated = :updated',
     ReturnValues: 'ALL_NEW'
   };
 

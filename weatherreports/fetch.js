@@ -23,7 +23,7 @@ module.exports.fetch = (event, context, callback) => {
   request.get({
       url: url,
       json: true,
-      headers: {'User-Agent': 'request'}
+      headers: {'User-Agent': 'wibsie'}
     }, (err, res, data) => {
       if (err || res.statusCode !== 200) {
         console.log('Status:', res.statusCode);

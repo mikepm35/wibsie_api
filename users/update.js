@@ -3,34 +3,32 @@
 const uuid = require('uuid');
 const AWS = require('aws-sdk');
 
+const userHelper = require('./user_helper.js');
+
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 module.exports.update = (event, context, callback) => {
   const timestamp = new Date().getTime();
   const data = JSON.parse(event.body);
 
-  // Data validation
-  if (typeof data.password != 'string') {
-    console.error('User update validation failed')
-    callback(null, {
-      statusCode: 400,
-      headers: {'Content-Type': 'text/plain'},
-      body: 'Failed updating user due to validation',
-    });
-    return;
-  }
+  // TODO: Data validation
 
   // Set table parameters
   const params = {
     TableName: process.env.DYNAMODB_TABLE_USERS,
     Key: {
-      id: event.pathParameters.id,
+      id: event.pathParameters.userid,
     },
     ExpressionAttributeValues: {
       ':password': data.password,
       ':updated': timestamp,
+      ':gender': data.gender,
+      ':height_in': data.height_in,
+      ':weight_lb': data.weight_lb,
+      ':bmi': userHelper.getBMI(data.weight_lb, data.height_in),
+      ':lifestyle': data.lifestyle,
     },
-    UpdateExpression: 'SET password = :password, updated = :updated',
+    UpdateExpression: 'SET password = :password, updated = :updated, gender = :gender, height_in = :height_in, weight_lb = :weight_lb, bmi = :bmi, lifestyle = :lifestyle',
     ReturnValues: 'ALL_NEW'
   };
 

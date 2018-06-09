@@ -24,7 +24,7 @@ module.exports.create = (event, context, callback) => {
 
   // Set table parameters
   var density_psqkm = null;
-  const density_psqkm = (data.population/data.aland_sqm)*1000000;
+  const density_psqkm = locationHelper.getPopDensity(data.population, data.aland_sqm);
   const params = {
     TableName: process.env.DYNAMODB_TABLE_LOCATIONS,
     Item: {

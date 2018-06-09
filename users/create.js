@@ -3,22 +3,16 @@
 const uuid = require('uuid');
 const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
 
+const userHelper = require('./user_helper.js');
+
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 module.exports.create = (event, context, callback) => {
   const timestamp = new Date().getTime();
   const data = JSON.parse(event.body);
 
-  // Data validation
-  if (typeof data.email !== 'string') {
-    console.error('User create validation failed');
-    callback(null, { //Don't set error object (null)
-      statusCode: 400,
-      headers: {'Content-Type': 'text/plain'},
-      body: 'Failed creating user due to validation',
-    });
-    return;
-  }
+  // TODO: Data validation
+  // e.g. lifestyle = ['sedentary', 'moderate_activity', 'high_activity']
 
   // Set table parameters
   const params = {
@@ -28,7 +22,12 @@ module.exports.create = (event, context, callback) => {
       created: timestamp,
       updated: timestamp,
       email: data.email,
-      password: data.password
+      password: data.password,
+      gender: data.gender,
+      height_in: data.height_in,
+      weight_lb: data.weight_lb,
+      bmi: userHelper.getBMI(data.weight_lb, data.height_in),
+      lifestyle: data.lifestyle,
     },
   };
 
@@ -51,7 +50,7 @@ module.exports.create = (event, context, callback) => {
       body: JSON.stringify(params.Item), //table fields
     };
     callback(null, response);
-    
+
   });
 
 };

@@ -9,7 +9,7 @@ module.exports.get = (event, context, callback) => {
   const params = {
     TableName: process.env.DYNAMODB_TABLE_USERS,
     Key: {
-      id: event.pathParameters.id,
+      id: event.pathParameters.userid,
     },
   };
 
@@ -32,7 +32,7 @@ module.exports.get = (event, context, callback) => {
       body: JSON.stringify(result.Item),
     };
     callback(null, response);
-    
+
   });
 
 };

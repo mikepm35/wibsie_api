@@ -23,11 +23,16 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
+        - dynamodb:GetRecords
+        - dynamodb:GetShardIterator
+        - dynamodb:DescribeStream
+        - dynamodb:ListStreams
       Resource:
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE_USERS}"
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE_EXPERIENCES}"
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE_LOCATIONS}"
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE_WEATHERREPORTS}"
+        - { Fn::GetAtt: [ ExperiencesDynamoDbTable, Arn ] }
 
   environment:
     DYNAMODB_TABLE_USERS: ${self:service}-users-${opt:stage, self:provider.stage}
@@ -37,6 +42,15 @@ provider:
     FUNCTION_PREFIX: ${self:service}-${opt:stage, self:provider.stage}-
 
 functions:
+  ### STREAM TRIGGERS ###
+  location_append:
+    handler: stream_handler/location_append.location_append
+    events:
+      - stream:
+          type: dynamodb
+          arn: { Fn::GetAtt: [ ExperiencesDynamoDbTable, StreamArn ] }
+          batchSize: 1
+
   ### USERS ###
   users_list:
     handler: users/list.list
@@ -58,7 +72,7 @@ functions:
     handler: users/get.get
     events:
       - http:
-          path: users/{id}
+          path: users/{userid}
           method: get
           cors: true
 
@@ -66,7 +80,7 @@ functions:
     handler: users/update.update
     events:
       - http:
-          path: users/{id}
+          path: users/{userid}
           method: put
           cors: true
 
@@ -74,7 +88,7 @@ functions:
     handler: users/delete.delete
     events:
       - http:
-          path: users/{id}
+          path: users/{userid}
           method: delete
           cors: true
 
@@ -153,7 +167,29 @@ functions:
           cors: true
 
   ### EXPERIENCES ###
-  #TODO
+  experience_create:
+    handler: experiences/create.create
+    events:
+      - http:
+          path: users/{userid}/experiences
+          method: post
+          cors: true
+
+  experience_get:
+    handler: experiences/get.get
+    events:
+      - http:
+          path: users/{userid}/experiences/{created}
+          method: get
+          cors: true
+
+  experience_update:
+    handler: experiences/update.update
+    events:
+      - http:
+          path: users/{userid}/experiences/{created}
+          method: put
+          cors: true
 
 resources:
   Resources:
@@ -179,22 +215,24 @@ resources:
       Properties:
         AttributeDefinitions:
           -
-            AttributeName: uid
+            AttributeName: user_id
             AttributeType: S
           -
-            AttributeName: weatherExpiration
+            AttributeName: created
             AttributeType: N
         KeySchema:
           -
-            AttributeName: uid
+            AttributeName: user_id
             KeyType: HASH
           -
-            AttributeName: weatherExpiration
+            AttributeName: created
             KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
         TableName: ${self:provider.environment.DYNAMODB_TABLE_EXPERIENCES}
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
     # LocationsDynamoDbTable:
     #   Type: 'AWS::DynamoDB::Table'
     #   DeletionPolicy: Retain

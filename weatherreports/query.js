@@ -22,7 +22,7 @@ module.exports.query = (event, context, callback) => {
   }
 
   // Determine location resolution path
-  if (location.indexOf(',') > -1) {
+  if (location.indexOf(',') > 0) {
     console.log('Resolving latlong data: ', location);
 
     // Parse string assuming lat,long format
@@ -36,7 +36,7 @@ module.exports.query = (event, context, callback) => {
       Payload: JSON.stringify({'body': {'latitude': lat, 'longitude': long}}, null)
     }
   } else {
-    console.log('Assuming location data is zip: ', location)
+    console.log('Assuming location data is zip: ', location);
 
     // Fetch zip entry
     var locationInvokeParams = {
@@ -48,8 +48,9 @@ module.exports.query = (event, context, callback) => {
 
   // Start location invoke and callback cascade
   lambda.invoke(locationInvokeParams, function(error, data) {
+    console.log('locationInvokeParams: ', locationInvokeParams);
     if (error) {
-      console.log('location_get lambda invoke  error: ', error, error.stack);
+      console.log('location lambda invoke  error: ', error, error.stack);
       callback(null, {
         statusCode: error.statusCode || 501,
         headers: {'Content-Type': 'text/plain'},
@@ -59,6 +60,9 @@ module.exports.query = (event, context, callback) => {
     } else {
       console.log('location invoke result: ', data);
       var locationData = JSON.parse(JSON.parse(data.Payload).body);
+
+      // Resolve lat, long from location result
+      var latlong = locationData.latitude + ',' + locationData.longitude;
 
       // Start query for weather report
       var getWeatherParams = {
@@ -80,7 +84,7 @@ module.exports.query = (event, context, callback) => {
 
       var items = []
       dynamoDb.query(getWeatherParams, (error, result) => {
-        console.log('Starting weather query with params: ', getWeatherParams)
+        console.log('Starting weather query with params: ', getWeatherParams);
         // Handle potential errors
         if (error) {
           console.error('getWeatherParams error: ', error);
@@ -103,10 +107,11 @@ module.exports.query = (event, context, callback) => {
             var weatherFetchInvokeParams = {
               FunctionName: process.env.FUNCTION_PREFIX + 'location_weatherreport_fetch',
               InvocationType: 'RequestResponse', // 'Event | RequestResponse | DryRun'
-              Payload: JSON.stringify({'pathParameters': {'latlong': lat+','+long}}, null)
+              Payload: JSON.stringify({'pathParameters': {'latlong': latlong}}, null)
             }
 
             lambda.invoke(weatherFetchInvokeParams, function(error, data) {
+              console.log('Invoking weather with: ', weatherFetchInvokeParams);
               if (error) {
                 console.log('location_weatherreport_fetch lambda invoke error: ', error, error.stack);
                 callback(null, {

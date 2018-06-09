@@ -1,6 +1,10 @@
 'use-strict';
 
 module.exports = {
+  getPopDensity: function (population, sqmi) {
+    return population/sqmi*1000000;
+  },
+
   getLocationType: function (pop_density) {
     //pop_density provided in people per sq kilometer
     if (pop_density >= (12000/2.5899)) { //12000 p/sqmi

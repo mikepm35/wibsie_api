@@ -27,6 +27,7 @@ module.exports.get = (event, context, callback) => {
     }
 
     // Create response
+    delete result.Item.password;
     const response = {
       statusCode: 200,
       body: JSON.stringify(result.Item),

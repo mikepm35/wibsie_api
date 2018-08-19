@@ -24,6 +24,10 @@ module.exports.list = (event, context, callback) => {
     }
 
     // Create response
+    for (var i = 0, len = result.Items.length; i < len; i++) {
+      delete result.Items[i].password;
+    }
+
     const response = {
       statusCode: 200,
       body: JSON.stringify(result.Items),

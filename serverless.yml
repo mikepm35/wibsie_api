@@ -40,6 +40,7 @@ provider:
     DYNAMODB_TABLE_LOCATIONS: ${self:service}-locations-${opt:stage, self:provider.stage}
     DYNAMODB_TABLE_WEATHERREPORTS: ${self:service}-weatherreports-${opt:stage, self:provider.stage}
     FUNCTION_PREFIX: ${self:service}-${opt:stage, self:provider.stage}-
+    STAGE: ${self:provider.stage}
 
 functions:
   ### STREAM TRIGGERS ###
@@ -59,6 +60,10 @@ functions:
           path: users
           method: get
           cors: true
+          authorizer:
+            arn: arn:aws:lambda:us-east-1:530583866435:function:wibsieAuthorizer
+            identitySource: method.request.header.AuthToken
+            type: request
 
   user_create:
     handler: users/create.create
@@ -67,6 +72,22 @@ functions:
           path: users
           method: post
           cors: true
+          authorizer:
+            arn: arn:aws:lambda:us-east-1:530583866435:function:wibsieAuthorizer
+            identitySource: method.request.header.AuthToken
+            type: request
+
+  user_query:
+    handler: users/query.query
+    events:
+      - http:
+          path: users/query
+          method: post
+          cors: true
+          authorizer:
+            arn: arn:aws:lambda:us-east-1:530583866435:function:wibsieAuthorizer
+            identitySource: method.request.header.AuthToken
+            type: request
 
   user_get:
     handler: users/get.get
@@ -75,6 +96,10 @@ functions:
           path: users/{userid}
           method: get
           cors: true
+          authorizer:
+            arn: arn:aws:lambda:us-east-1:530583866435:function:wibsieAuthorizer
+            identitySource: method.request.header.AuthToken
+            type: request
 
   user_update:
     handler: users/update.update
@@ -83,6 +108,10 @@ functions:
           path: users/{userid}
           method: put
           cors: true
+          authorizer:
+            arn: arn:aws:lambda:us-east-1:530583866435:function:wibsieAuthorizer
+            identitySource: method.request.header.AuthToken
+            type: request
 
   user_delete:
     handler: users/delete.delete
@@ -91,6 +120,10 @@ functions:
           path: users/{userid}
           method: delete
           cors: true
+          authorizer:
+            arn: arn:aws:lambda:us-east-1:530583866435:function:wibsieAuthorizer
+            identitySource: method.request.header.AuthToken
+            type: request
 
   ### LOCATIONS ###
   locations_list:
@@ -100,6 +133,10 @@ functions:
           path: locations
           method: get
           cors: true
+          authorizer:
+            arn: arn:aws:lambda:us-east-1:530583866435:function:wibsieAuthorizer
+            identitySource: method.request.header.AuthToken
+            type: request
 
   location_create:
     handler: locations/create.create
@@ -108,6 +145,10 @@ functions:
           path: locations
           method: post
           cors: true
+          authorizer:
+            arn: arn:aws:lambda:us-east-1:530583866435:function:wibsieAuthorizer
+            identitySource: method.request.header.AuthToken
+            type: request
 
   location_get:
     handler: locations/get.get
@@ -116,6 +157,10 @@ functions:
           path: locations/{zip}
           method: get
           cors: true
+          authorizer:
+            arn: arn:aws:lambda:us-east-1:530583866435:function:wibsieAuthorizer
+            identitySource: method.request.header.AuthToken
+            type: request
 
   location_update:
     handler: locations/update.update
@@ -124,6 +169,10 @@ functions:
           path: locations/{zip}
           method: put
           cors: true
+          authorizer:
+            arn: arn:aws:lambda:us-east-1:530583866435:function:wibsieAuthorizer
+            identitySource: method.request.header.AuthToken
+            type: request
 
   location_delete:
     handler: locations/delete.delete
@@ -132,6 +181,10 @@ functions:
           path: locations/{zip}
           method: delete
           cors: true
+          authorizer:
+            arn: arn:aws:lambda:us-east-1:530583866435:function:wibsieAuthorizer
+            identitySource: method.request.header.AuthToken
+            type: request
 
   location_zipfromlatlong:
     handler: locations/zipFromLatLong.zipFromLatLong
@@ -140,6 +193,10 @@ functions:
           path: locations/zipFromLatLong
           method: post
           cors: true
+          authorizer:
+            arn: arn:aws:lambda:us-east-1:530583866435:function:wibsieAuthorizer
+            identitySource: method.request.header.AuthToken
+            type: request
 
   ### WEATHER REPORTS ###
   location_weatherreport_query:
@@ -149,6 +206,10 @@ functions:
           path: weatherreports
           method: get
           cors: true
+          authorizer:
+            arn: arn:aws:lambda:us-east-1:530583866435:function:wibsieAuthorizer
+            identitySource: method.request.header.AuthToken
+            type: request
 
   location_weatherreport_fetch:
     handler: weatherreports/fetch.fetch
@@ -157,6 +218,10 @@ functions:
           path: weatherreports/{latlong}
           method: get
           cors: true
+          authorizer:
+            arn: arn:aws:lambda:us-east-1:530583866435:function:wibsieAuthorizer
+            identitySource: method.request.header.AuthToken
+            type: request
 
   location_weatherreport_create:
     handler: weatherreports/create.create
@@ -165,6 +230,10 @@ functions:
           path: weatherreports
           method: post
           cors: true
+          authorizer:
+            arn: arn:aws:lambda:us-east-1:530583866435:function:wibsieAuthorizer
+            identitySource: method.request.header.AuthToken
+            type: request
 
   ### EXPERIENCES ###
   experience_create:
@@ -174,6 +243,10 @@ functions:
           path: users/{userid}/experiences
           method: post
           cors: true
+          authorizer:
+            arn: arn:aws:lambda:us-east-1:530583866435:function:wibsieAuthorizer
+            identitySource: method.request.header.AuthToken
+            type: request
 
   experience_get:
     handler: experiences/get.get
@@ -182,6 +255,10 @@ functions:
           path: users/{userid}/experiences/{created}
           method: get
           cors: true
+          authorizer:
+            arn: arn:aws:lambda:us-east-1:530583866435:function:wibsieAuthorizer
+            identitySource: method.request.header.AuthToken
+            type: request
 
   experience_update:
     handler: experiences/update.update
@@ -190,6 +267,26 @@ functions:
           path: users/{userid}/experiences/{created}
           method: put
           cors: true
+          authorizer:
+            arn: arn:aws:lambda:us-east-1:530583866435:function:wibsieAuthorizer
+            identitySource: method.request.header.AuthToken
+            type: request
+
+plugins:
+  - serverless-domain-manager
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  domains:
+    prod: api.wibsie.com
+    staging: staging-api.wibsie.com
+    dev: dev-api.wibsie.com
+
+  customDomain:
+    basePath: "app"
+    domainName: ${self:custom.domains.${self:custom.stage}}
+    stage: "${self:custom.stage}"
+    createRoute53Record: true
 
 resources:
   Resources:

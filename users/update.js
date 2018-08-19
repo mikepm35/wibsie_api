@@ -2,6 +2,7 @@
 
 const uuid = require('uuid');
 const AWS = require('aws-sdk');
+const bcrypt = require('bcryptjs');
 
 const userHelper = require('./user_helper.js');
 
@@ -13,6 +14,9 @@ module.exports.update = (event, context, callback) => {
 
   // TODO: Data validation
 
+  // Create password hash
+  var hash = bcrypt.hashSync(data.password, 10);
+
   // Set table parameters
   const params = {
     TableName: process.env.DYNAMODB_TABLE_USERS,
@@ -20,15 +24,16 @@ module.exports.update = (event, context, callback) => {
       id: event.pathParameters.userid,
     },
     ExpressionAttributeValues: {
-      ':password': data.password,
+      ':password': hash,
       ':updated': timestamp,
+      ':birth_year': data.birth_year,
       ':gender': data.gender,
       ':height_in': data.height_in,
       ':weight_lb': data.weight_lb,
       ':bmi': userHelper.getBMI(data.weight_lb, data.height_in),
       ':lifestyle': data.lifestyle,
     },
-    UpdateExpression: 'SET password = :password, updated = :updated, gender = :gender, height_in = :height_in, weight_lb = :weight_lb, bmi = :bmi, lifestyle = :lifestyle',
+    UpdateExpression: 'SET password = :password, updated = :updated, birth_year = :birth_year, gender = :gender, height_in = :height_in, weight_lb = :weight_lb, bmi = :bmi, lifestyle = :lifestyle',
     ReturnValues: 'ALL_NEW'
   };
 

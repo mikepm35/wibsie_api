@@ -13,6 +13,7 @@ module.exports.location_append = (event, context, callback) => {
     console.log(record.eventID)
     console.log(record.eventName)
     console.log('DynamoDB Record: %j', record.dynamodb)
+
     if (record.eventName === 'INSERT') {
       // Invoke location lambda to read item
       // If doesn't have additional data, make web call and append
@@ -94,7 +95,35 @@ module.exports.location_append = (event, context, callback) => {
 
       }); // end location invoke
 
-    } // end if INSERT
+    } else if (record.eventName === 'MODIFY') {
+      if (record.dynamodb.NewImage.comfort_level_result.S != 'none') {
+        console.log('Detected comfort_level_result result change, dispatching to upload_data');
+
+        var uploaddataInvokeParams = {
+          FunctionName: process.env.FUNCTION_PREFIX_ML + 'upload_data',
+          InvocationType: 'Event', // 'Event | RequestResponse | DryRun'
+          Payload: JSON.stringify({'user_id': record.dynamodb.Keys.user_id.S})
+        }
+
+        // Invoke
+        lambda.invoke(uploaddataInvokeParams, function(error, data) {
+          console.log('uploaddataInvokeParams update: ', uploaddataInvokeParams);
+          if (error) {
+            console.log('upload_data lambda invoke  error: ', error, error.stack);
+            callback(null, 'Failed triggering upload_data due to location invoke parameters');
+            return;
+          } else {
+            console.log('upload_data lambda invoke successful');
+            callback(null, 'Successfully triggered upload_data');
+            return;
+          }
+        }); // end lambda invoke to upload data
+
+      } else {
+        console.log('Modify event did not qualify');
+      } // end if comfort_level_result
+
+    }// end if INSERT/MODIFY
 
   }) // end event parse loop
 

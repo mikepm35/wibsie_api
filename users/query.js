@@ -65,10 +65,9 @@ module.exports.query = (event, context, callback) => {
 
     }
 
-    console.log('User query result: ', responseCode, responseItem);
-
     // Create response
     delete responseItem.password;
+    console.log('User query result: ', responseCode, responseItem);
     const response = {
       statusCode: responseCode,
       body: JSON.stringify(responseItem),

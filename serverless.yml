@@ -8,7 +8,7 @@ provider:
   stackTags:
     GROUP: "wibsie"
 
-  stage: prod
+  stage: dev
   region: us-east-1
 
   iamRoleStatements:
@@ -42,6 +42,7 @@ provider:
     DYNAMODB_TABLE_LOCATIONS: ${self:service}-locations-${opt:stage, self:provider.stage}
     DYNAMODB_TABLE_WEATHERREPORTS: ${self:service}-weatherreports-${opt:stage, self:provider.stage}
     FUNCTION_PREFIX: ${self:service}-${opt:stage, self:provider.stage}-
+    FUNCTION_PREFIX_ML: wibsie-ml3-${opt:stage, self:provider.stage}-
     STAGE: ${self:provider.stage}
 
 functions:
@@ -292,22 +293,22 @@ custom:
 
 resources:
   Resources:
-    UsersDynamoDbTable:
-      Type: 'AWS::DynamoDB::Table'
-      DeletionPolicy: Retain
-      Properties:
-        AttributeDefinitions:
-          -
-            AttributeName: id
-            AttributeType: S
-        KeySchema:
-          -
-            AttributeName: id
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-        TableName: ${self:provider.environment.DYNAMODB_TABLE_USERS}
+#     UsersDynamoDbTable:
+#       Type: 'AWS::DynamoDB::Table'
+#       DeletionPolicy: Retain
+#       Properties:
+#         AttributeDefinitions:
+#           -
+#             AttributeName: id
+#             AttributeType: S
+#         KeySchema:
+#           -
+#             AttributeName: id
+#             KeyType: HASH
+#         ProvisionedThroughput:
+#           ReadCapacityUnits: 1
+#           WriteCapacityUnits: 1
+#         TableName: ${self:provider.environment.DYNAMODB_TABLE_USERS}
     ExperiencesDynamoDbTable:
       Type: 'AWS::DynamoDB::Table'
       DeletionPolicy: Retain
@@ -332,41 +333,41 @@ resources:
         TableName: ${self:provider.environment.DYNAMODB_TABLE_EXPERIENCES}
         StreamSpecification:
           StreamViewType: NEW_AND_OLD_IMAGES
-    LocationsDynamoDbTable:
-      Type: 'AWS::DynamoDB::Table'
-      DeletionPolicy: Retain
-      Properties:
-        AttributeDefinitions:
-          -
-            AttributeName: zip
-            AttributeType: S
-        KeySchema:
-          -
-            AttributeName: zip
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-        TableName: ${self:provider.environment.DYNAMODB_TABLE_LOCATIONS}
-    WeatherreportsDynamoDbTable:
-      Type: 'AWS::DynamoDB::Table'
-      DeletionPolicy: Retain
-      Properties:
-        AttributeDefinitions:
-          -
-            AttributeName: zip
-            AttributeType: S
-          -
-            AttributeName: expires
-            AttributeType: N
-        KeySchema:
-          -
-            AttributeName: zip
-            KeyType: HASH
-          -
-            AttributeName: expires
-            KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-        TableName: ${self:provider.environment.DYNAMODB_TABLE_WEATHERREPORTS}
+#     LocationsDynamoDbTable:
+#       Type: 'AWS::DynamoDB::Table'
+#       DeletionPolicy: Retain
+#       Properties:
+#         AttributeDefinitions:
+#           -
+#             AttributeName: zip
+#             AttributeType: S
+#         KeySchema:
+#           -
+#             AttributeName: zip
+#             KeyType: HASH
+#         ProvisionedThroughput:
+#           ReadCapacityUnits: 1
+#           WriteCapacityUnits: 1
+#         TableName: ${self:provider.environment.DYNAMODB_TABLE_LOCATIONS}
+#     WeatherreportsDynamoDbTable:
+#       Type: 'AWS::DynamoDB::Table'
+#       DeletionPolicy: Retain
+#       Properties:
+#         AttributeDefinitions:
+#           -
+#             AttributeName: zip
+#             AttributeType: S
+#           -
+#             AttributeName: expires
+#             AttributeType: N
+#         KeySchema:
+#           -
+#             AttributeName: zip
+#             KeyType: HASH
+#           -
+#             AttributeName: expires
+#             KeyType: RANGE
+#         ProvisionedThroughput:
+#           ReadCapacityUnits: 1
+#           WriteCapacityUnits: 1
+#         TableName: ${self:provider.environment.DYNAMODB_TABLE_WEATHERREPORTS}

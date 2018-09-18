@@ -22,7 +22,7 @@ module.exports.query = (event, context, callback) => {
   console.log('Data: ', data)
 
   // Check if warm only
-  if (data.warm_only) {
+  if (data && data.warm_only) {
     console.log('Exiting due to warm only present');
     callback(null, {
       statusCode: 204,

@@ -11,6 +11,27 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 // Location is resolved to a zip and with time used to search for existing weather report
 // If weather report doesn't exist, fetch it from service and store in database
 module.exports.query = (event, context, callback) => {
+  console.log('Received event: ', event)
+
+  // Handle lambda-lambda calls
+  var data = event.body
+  if (typeof data == 'string') {
+    data = JSON.parse(data)
+  }
+
+  console.log('Data: ', data)
+
+  // Check if warm only
+  if (data.warm_only) {
+    console.log('Exiting due to warm only present');
+    callback(null, {
+      statusCode: 204,
+      headers: {'Content-Type': 'text/plain'},
+      body: 'Exiting due to warm only present',
+    });
+    return;
+  }
+
   const timestamp = new Date().getTime();
   var epoch = event.queryStringParameters.epoch;
 

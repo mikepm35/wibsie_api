@@ -5,6 +5,8 @@ const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 module.exports.get = (event, context, callback) => {
+  console.log('userid: ', event.pathParameters.userid);
+
   // Set table parameters
   const params = {
     TableName: process.env.DYNAMODB_TABLE_USERS,

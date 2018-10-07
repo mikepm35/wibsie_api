@@ -47,7 +47,7 @@ module.exports.query = (event, context, callback) => {
       // }
 
       if (item.email.toLowerCase() === email.toLowerCase()) {
-        if (process.env.STAGE === 'dev' && item.password.indexOf('$') < 0) {
+        if (process.env.STAGE === 'dev' || item.password.indexOf('$') < 0) {
           console.log('Using plain text password match: ', email);
           var pwmatch = item.password===password;
         } else {

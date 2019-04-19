@@ -1,5 +1,10 @@
 ## Wibsie API
 
+Wibsie is an application that uses machine learning to predict comfort levels.  This API provides foundational data management for users, experiences, locations, and weatherreports.
+
+API is deployed using Serverless to AWS Services: Lambda, API Gateway, and DynamoDB
+
+
 **Version control**
 * 'dev' is dev branch, 'master' is prod branch
 

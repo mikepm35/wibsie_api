@@ -42,7 +42,7 @@ module.exports.location_append = (event, context, callback) => {
 
           } else {
             // Begin fetch for secondary data
-            var url = 'https://api.censusreporter.org/1.0/geo/tiger2017/86000US'+locationData.zip;
+            var url = 'https://api.censusreporter.org/1.0/geo/tiger2018/86000US'+locationData.zip;
             console.log('start request to ' + url);
 
             request.get({
